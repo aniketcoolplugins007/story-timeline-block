@@ -104,7 +104,7 @@ function contentTimelineStyle( props ) {
         "color": subHeadingColor,
     },
     " .cool-vertical-timeline-body::before" :{
-        "background":LineColor
+        "background":"linear-gradient(to bottom, rgba(230, 230, 230, 0) 0%, "+LineColor+" 10%, "+LineColor+" 90%, rgba(230, 230, 230, 0) 100%)"
     },
     " .cool-horizontal-timeline-body .timeline-content::before" :{
         "background":LineColor

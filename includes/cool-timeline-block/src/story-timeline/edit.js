@@ -1,14 +1,9 @@
-/**
- * BLOCK: Story Timeline.
- */
-
 import classnames from "classnames"
 // import map from "lodash/map"
 import times from "lodash/times"
 import memoize from "memize"
 
 import contentTimelineStyle from "./styling"
-import {LayoutInit} from "./layout"
 
 // Import all of our Text Options requirements.
 import TypographyControl from "../component/typography"
@@ -42,7 +37,13 @@ const {
 	Spinner,
 	ColorPicker,
 	ColorPalette,
-        RadioControl
+    RadioControl,
+	ExternalLink,
+	Card,
+	CardBody,
+	CardFooter,
+	Button,
+	ButtonGroup
 } = wp.components
 
 const {
@@ -54,7 +55,6 @@ const {
 const ALLOWED_BLOCKS = [ "cp-timeline/content-timeline-block-child" ]
 
 
-
 const $ = jQuery;
 
 class Edit extends Component {
@@ -64,11 +64,9 @@ class Edit extends Component {
 	}
 
 	addBlock(e){
-
-		let index = wp.data.select("core/block-editor").getBlockCount(this.props.clientId)
-
+		let index = wp.data.select("core/block-editor").getBlockCount(this.props.clientId);
 		let name = 'cp-timeline/content-timeline-block-child';
-		let insertedBlock = wp.blocks.createBlock(name, {block_position_active:false
+		let insertedBlock = wp.blocks.createBlock(name, {block_position_active:false,blockPosition:index % 2 ? 'left':'right',
 		}	);
 		wp.data.dispatch('core/block-editor').insertBlocks(insertedBlock,index+1,this.props.clientId);
 		let blocksCount = wp.data.select("core/block-editor").getBlockCount(this.props.clientId)
@@ -77,10 +75,10 @@ class Edit extends Component {
 
 	onUpdateOrientation(newOrientation) {
 		this.props.setAttributes({Orientation: newOrientation});
-                if (this.props.attributes.timelineLayout == "vertical" && this.props.attributes.timelineDesign == "alternating-sided") {
-		        const blocks = select("core/block-editor").getBlock(this.props.clientId).innerBlocks,
-		              evenPosition = newOrientation,
-		              oddPosition = newOrientation === 'left' ? 'right' : 'left';
+		if (this.props.attributes.timelineLayout == "vertical" && this.props.attributes.timelineDesign == "both-sided") {
+			const blocks = select("core/block-editor").getBlock(this.props.clientId).innerBlocks,
+			evenPosition = newOrientation,
+			oddPosition = newOrientation === 'left' ? 'right' : 'left';
 		        blocks.forEach((block, index) => block.attributes.blockPosition = index % 2 ? oddPosition : evenPosition);
                 }
         }
@@ -139,7 +137,7 @@ class Edit extends Component {
 				Orientation,
 				timelineDesign,
 				slidePerView,
-				iconColor,
+				iconColor
 			},
 		} = this.props
 
@@ -155,7 +153,7 @@ class Edit extends Component {
 			}
 
 		const orientation_setting = <SelectControl
-						label={ timelineDesign == "alternating-sided" ? __("First story's side") : __( "Alignment" ) }
+						label={ timelineDesign == "both-sided" ? __("First story's side") : __( "Alignment" ) }
 						value={ Orientation }
 						onChange={ this.onUpdateOrientation }
 						options={ [
@@ -163,7 +161,8 @@ class Edit extends Component {
 							{ value: "left", label: __( "Left Sided") },
 						] }
 						/>
-		const general_setting= <PanelBody title={__("General Settings")} initialOpen={ false }>
+		
+		const general_setting= <CardBody>
 			<h2 style={{fontWeight: 600}}>Story Heading</h2>
 			<TypographyControl
 			label={ __( "Typography",'timeline-block' ) }
@@ -242,9 +241,9 @@ class Edit extends Component {
 
         />
 
-	</PanelBody>
+	</CardBody>
 	const advanced_setting =
-				<PanelBody title={__("Advanced Settings")} initialOpen={ false }>
+				<CardBody>
 				<h2>Line Color</h2>
 				<ColorPalette
 				colors = {colors}
@@ -272,9 +271,16 @@ class Edit extends Component {
 				onChange = {( colorValue ) => setAttributes( { storyBorderColor: colorValue } )}
 				/>
 
-			</PanelBody>
-		const timeline_setting = <InspectorControls>
-			<PanelBody title={__("Timeline Settings")} >
+			</CardBody>
+		const rating_box = <PanelBody title={__("Please share your Feedback.")}>
+			<CardBody className={"cool-timeline-gt-block-review-tab"}><ExternalLink href="https://wordpress.org/support/plugin/timeline-block/reviews/">{__("We hope you liked our plugin created timelines. Please share your valuable feedback.")}</ExternalLink>
+			<CardFooter className={"cool-timeline-gt-block-review-tab-button"}>
+				<Button className={"button-primary"}>{__("Already Rated")}</Button>
+				<Button className={"button-primary"}>{__("Not Interesetd")}</Button>
+			</CardFooter>
+			</CardBody>
+		</PanelBody>
+		const timeline_setting =<CardBody>
 			<SelectControl
 						label={ __( "Timeline Layout" ) }
 						value={ timelineLayout }
@@ -301,7 +307,6 @@ class Edit extends Component {
 					} }
 						options={ [
 							{ value: "both-sided", label: __( "Both Sided") },
-							{ value: "alternating-sided", label: __( "Alternating Sided") },
 							{ value: "one-sided", label: __( "One Sided",) },
 
 						] }
@@ -321,12 +326,41 @@ class Edit extends Component {
 					// />
 					}
 
-					{ ["one-sided", "alternating-sided"].includes(timelineDesign) && timelineLayout == "vertical" ? orientation_setting : null }
-			</PanelBody>
-			{general_setting}
-			{advanced_setting}
+					{ ["one-sided",'both-sided'].includes(timelineDesign) && timelineLayout == "vertical" ? orientation_setting : null }
+			</CardBody>
+			let settingTabs = 
+			<InspectorControls>
+				<TabPanel
+					className="cooltimeline-tab-settings"
+					activeClass="active-tab"
+					tabs={ [
+						{
+							name: 'timeline_setting',
+							title: 'Timeline',
+							className: 'tab-one',
+							content: timeline_setting
+						},
+						{
+							name: 'general_setting',
+							title: 'General',
+							className: 'tab-two',
+							content: general_setting
+						},
+						{
+							name: 'advanced_setting',
+							title: 'Advanced',
+							className: 'tab-three',
+							content: advanced_setting
+						},
+					] }
+				>
+					{ ( tab ) => <Card>{tab.content}</Card> }
+				</TabPanel>
+				{rating_box}
+				<PanelBody title={__("View Timeline Demos")}>
+					<a target="_blank" class="button button-primary" href="https://cooltimeline.com/instant-timeline-builder/">View Demos</a>
+				</PanelBody>
 			</InspectorControls>
-
 			const getContentTimelineTemplate = memoize( ( icon_block, tm_content ) => {
 				return times( icon_block, n => [ 'cp-timeline/content-timeline-block-child',tm_content[n]] )
 			} )
@@ -393,10 +427,6 @@ class Edit extends Component {
 									onClick: () => setAttributes({timelineDesign:"both-sided"}) ,
 								},
 								{
-									title: 'Alternating side',
-									onClick: () => setAttributes({timelineDesign:"alternating-sided"}) ,
-								},
-								{
 									title: 'One Sided',
 									onClick: () => setAttributes({timelineDesign:"one-sided"}),
 								},
@@ -406,24 +436,21 @@ class Edit extends Component {
 						:null}
 					{ loadHeadGoogleFonts }
 					 {loadSubHeadGoogleFonts }
-					{timeline_setting}
+					{settingTabs}
 					{loadDateGoogleFonts }
 
 				<div className={"cool-timeline-block-" + this.props.clientId + " cool-timeline-block"}>
-								<div className={"cool-" + (timelineLayout == 'alternating-sided' ? 'both-sided' : timelineLayout) + "-timeline-body " + timelineDesign + " " + Orientation + ""}>
+								<div className={"cool-" + (timelineLayout) + "-timeline-body " + timelineDesign + " " + Orientation + ""}>
 									<div className="list">
-									{timelineLayout == "vertical" ?
 										<InnerBlocks
                                             allowedBlocks={ALLOWED_BLOCKS}
                                             orientation="vertical"
                                             template={ getContentTimelineTemplate( timelineItem, tm_content ) }
 
-                                            />:
-											<LayoutInit />
-										}
+                                        />
 								</div>
-							</div><div onClick={e => this.addBlock(e)} className="timeline-block-add-story">
-									<button type="button" visible="true" className="components-button block-editor-button-block-appender is-primary" aria-label="Add Story"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false"><path d="M18 11.2h-5.2V6h-1.6v5.2H6v1.6h5.2V18h1.6v-5.2H18z"></path></svg>Add Story</button>
+							</div><div className="timeline-block-add-story">
+									<button onClick={e => this.addBlock(e)}  type="button" visible="true" className="components-button block-editor-button-block-appender is-primary" aria-label="Add Story"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false"><path d="M18 11.2h-5.2V6h-1.6v5.2H6v1.6h5.2V18h1.6v-5.2H18z"></path></svg>Add Story</button>
 								</div>
 								</div>
 			</div>
@@ -445,18 +472,17 @@ class Edit extends Component {
 		let timelineDesign= this.props.attributes.timelineDesign
 
 		// Recalculate alternating sides if new child block was added or removed
-		this.childCount = select("core/block-editor").getBlock(this.props.clientId).innerBlocks.length;
+		// this.childCount = select("core/block-editor").getBlock(this.props.clientId).innerBlocks.length;
 		wp.data.subscribe(() => {
 			const childBlocks = select("core/block-editor").getBlock(this.props.clientId);
-                       if (!childBlocks || !childBlocks.innerBlocks) {
-                               return;
-                       }
+			if (!childBlocks || !childBlocks.innerBlocks) {
+				return;
+			}
 			const currentChildCount = childBlocks.innerBlocks.length;
 			const childWasAddedOrRemoved = this.childCount !== currentChildCount;
-
+			
 			this.childCount = currentChildCount;
-
-			if (!childWasAddedOrRemoved || this.props.attributes.timelineDesign !== 'alternating-sided') {
+			if (!childWasAddedOrRemoved) {
 				return;
 			}
 

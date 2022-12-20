@@ -245,7 +245,9 @@
 //   height: auto;
 // }
 
-
+  .timeline-content .story-image.full img{
+    width: 100%;
+  }
 /* ONE SIDED CSS - START */
 .cool-vertical-timeline-body.one-sided:before {
   left: calc(30% - 1.5px);

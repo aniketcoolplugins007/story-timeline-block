@@ -79,7 +79,6 @@ class Edit extends Component {
 			renderFunc: renderSVG,
 			noSelectedPlaceholder: __( "Select Icon" )
 		};
-
 		const StoryDetail = () => (
 			<div className="story-details">
 			  <MediaUpload
@@ -98,7 +97,7 @@ class Edit extends Component {
 				    <Fragment>
 				      {timeLineImage !== "none" ?
 				       <Fragment>
-					 <div className="story-image">
+					 <div className={`story-image ${imageSize}`}>
 					   <img src={timeLineImage}  />
 					 </div>
 					 <Button isSecondary onClick={(value) => setAttributes({timeLineImage:'none'})}>
@@ -225,20 +224,20 @@ class Edit extends Component {
 			    <hr className="timeline-block-editor__separator"></hr>
 
 			    <RadioControl
-			      label="Story Icon"
-			      selected={ iconToggle }
-			      options={ [
-				      { label: 'Default(dot)',value:"false"},
-				      { label: 'Custom(Font Awesome Icon)',value:"true"},
-			      ] }
-			      onChange={( value )=>setAttributes({iconToggle:value})}
-			    />
-			    {iconToggle == "true" ?
-			     <Fragment> <div className="timeline-block-iconpicker" ><FontIconPicker {...icon_props} /> </div>
-
-			     </Fragment>
-			     : null}
-			  </PanelBody>
+						label="Story Icon"
+						selected={ iconToggle }
+						options={ [
+							{ label: 'Default(dot)',value:"false"},
+							{ label: 'Custom(Font Awesome Icon)',value:"true"},
+						] } 
+						onChange={( value )=>setAttributes({iconToggle:value})}
+					/>
+					{iconToggle == "true" ?
+					<Fragment> <div className="timeline-block-iconpicker" ><FontIconPicker {...icon_props} /> </div>
+			
+				</Fragment>
+					: null}	
+				</PanelBody>
 			</InspectorControls>
 		);
 
